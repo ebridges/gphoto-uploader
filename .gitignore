@@ -6,3 +6,4 @@
 
 # Package Files #
 *.jar
+.gradle/
