@@ -41,6 +41,42 @@ public class Uploader {
   private void upload(Credential credential, String mediaPath) throws IOException {
     String uploadId = uploadBytes(credential, mediaPath);
     LOG.info("uploadId: {}", uploadId);
+  //    POST https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate
+  //    Content-type: application/json
+  //    Authorization: Bearer OAUTH2_TOKEN
+  //
+  //    {
+  //      "newMediaItems": [
+  //        {
+  //          "description": "ITEM_DESCRIPTIOM",
+  //            "simpleMediaItem": {
+  //              "uploadToken": "UPLOAD_TOKEN"
+  //            }
+  //        }
+  //      ]
+  //    }
+  //
+  // OK RESPONSE:
+  //    {
+  //       "newMediaItemResults":[
+  //          {
+  //             "uploadToken":"CAIS+QIApKFirUvlZW+qNVVRSL/ce61gTWh/U/lOsx1BmjfQNcyygOqfqKUjr9MhnLHAgnM5nGDR1WB98s+++DSEUQ5CDp/1/9wF9VsXp63pPajlQevzU/QMLZN1KUvL0AL43ynHyli42s7F7NIcUtS7Y6RRbEqqjt34ZlFrAkwaj3dHyCW8aMJOLNHyULG7D4HlmAP6oyYfGOwONjIrR2Mk6FDgwyTtifU3JZg+6B/RS2FYR0czd8VurPMUIb/YNNurwd3SyE7TBhDtt8ICBs+N5Ka7EFX55kA90TEGjagrhlVRbpflNZ1udsPaX2ewVUlJafpJMso0CRgQQHf+H2IyN2xxDEp/2mOiiOWrX72FK5KMDZwy7YCkSuU3AxELLb5ltUH596EZIwIAHLqlZkNKXbbgSm3MjwtHmzaN5dApg02bc+t6AF6+AEAQci/xGbeY0hCwTe/4etZvN+huy0bt0nI5futo/lZVqyodPWgeWMz3/nR0TvKU8YVvUA",
+  //             "status":{
+  //                "message":"OK"
+  //             },
+  //             "mediaItem":{
+  //                "id":"AGj1epUg7grprmyLMqcHuMxULPDLPgyzzWl33fdhW849o8_N9suu1Ixk_04o2PQE36B5ILA_zL_ulLE",
+  //                "productUrl":"https://photos.google.com/lr/photo/AGj1epUg7grprmyLMqcHuMxULPDLPgyzzWl33fdhW849o8_N9suu1Ixk_04o2PQE36B5ILA_zL_ulLE",
+  //                "mimeType":"image/jpeg",
+  //                "mediaMetadata":{
+  //                   "creationTime":"2018-05-10T14:52:04Z",
+  //                   "width":"4032",
+  //                   "height":"3024"
+  //                }
+  //             }
+  //          }
+  //       ]
+  //    }
 
   }
 
