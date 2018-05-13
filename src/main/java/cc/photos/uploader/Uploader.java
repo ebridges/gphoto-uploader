@@ -1,11 +1,14 @@
 package cc.photos.uploader;
 
+import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +23,9 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 
 public class Uploader {
   private static final Logger LOG = LoggerFactory.getLogger(Uploader.class);
@@ -29,6 +35,37 @@ public class Uploader {
     Uploader u = new Uploader();
     Credential c = u.authorize();
     LOG.info( "Credential expires in secs: " + c.getExpiresInSeconds());
+  }
+
+  private void upload(Credential credential, String mediaPath) throws IOException {
+    String uploadId = uploadBytes(credential, mediaPath);
+
+
+  }
+
+  private String uploadBytes(Credential credential, String mediaPath) throws IOException {
+    File fromFile = new File(mediaPath);
+    byte[] mediaBytes = readBytes(fromFile);
+    HttpResponse<String> jsonResponse;
+    try {
+      jsonResponse = Unirest.post("https://photoslibrary.googleapis.com/v1/uploads")
+          .header("content-type", "application/octet-stream")
+          .header("accept", "application/json")
+          .header("authorization", format("bearer %s", credential.getAccessToken()))
+          .header("X-Goog-Upload-File-Name", mediaPath)
+          .body(mediaBytes)
+          .asString();
+    } catch (UnirestException e) {
+      throw new IOException(e);
+    }
+    LOG.info("response: {}", jsonResponse.getBody());
+    return null;
+  }
+
+  private byte[] readBytes(File mediaPath) throws IOException {
+    try(InputStream is = new FileInputStream(mediaPath)) {
+      return IOUtils.toByteArray(is);
+    }
   }
 
   private Credential authorize() throws Exception {
