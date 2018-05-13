@@ -7,3 +7,6 @@
 # Package Files #
 *.jar
 .gradle/
+
+datastore/
+**/client-secret.json
