@@ -42,6 +42,10 @@ public class Uploader {
   private void upload(Credential credential, String mediaPath) throws IOException {
     String uploadId = uploadBytes(credential, mediaPath);
     LOG.info("uploadId: {}", uploadId);
+    String response = addMediaItem(credential, uploadId, mediaPath);
+    LOG.info("Upload completed: {}", response);
+  }
+
   //    POST https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate
   //    Content-type: application/json
   //    Authorization: Bearer OAUTH2_TOKEN
