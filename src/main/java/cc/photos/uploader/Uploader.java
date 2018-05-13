@@ -34,7 +34,7 @@ public class Uploader {
     LOG.info("GPhoto Uploader Started.");
     Uploader u = new Uploader();
     Credential c = u.authorize();
-    LOG.info( "Credential expires in secs: " + c.getExpiresInSeconds());
+    LOG.info( "Credential expires in secs: {}", c.getExpiresInSeconds());
     u.upload(c, args[0]);
   }
 
