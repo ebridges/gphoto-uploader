@@ -35,11 +35,12 @@ public class Uploader {
     Uploader u = new Uploader();
     Credential c = u.authorize();
     LOG.info( "Credential expires in secs: " + c.getExpiresInSeconds());
+    u.upload(c, args[0]);
   }
 
   private void upload(Credential credential, String mediaPath) throws IOException {
     String uploadId = uploadBytes(credential, mediaPath);
-
+    LOG.info("uploadId: {}", uploadId);
 
   }
 
@@ -58,8 +59,8 @@ public class Uploader {
     } catch (UnirestException e) {
       throw new IOException(e);
     }
-    LOG.info("response: {}", jsonResponse.getBody());
-    return null;
+    LOG.info("response: {} [{}]", jsonResponse.getStatusText(), jsonResponse.getStatus());
+    return jsonResponse.getBody();
   }
 
   private byte[] readBytes(File mediaPath) throws IOException {
