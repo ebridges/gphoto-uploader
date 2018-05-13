@@ -51,7 +51,7 @@ public class Uploader {
       jsonResponse = Unirest.post("https://photoslibrary.googleapis.com/v1/uploads")
           .header("content-type", "application/octet-stream")
           .header("accept", "application/json")
-          .header("authorization", format("bearer %s", credential.getAccessToken()))
+          .header("authorization", format("Bearer %s", credential.getAccessToken()))
           .header("X-Goog-Upload-File-Name", mediaPath)
           .body(mediaBytes)
           .asString();
