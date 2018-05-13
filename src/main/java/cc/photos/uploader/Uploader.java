@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,6 +79,28 @@ public class Uploader {
   //       ]
   //    }
 
+  private String addMediaItem(Credential credential, String uploadId, String mediaPath) throws IOException {
+    HttpResponse<String> jsonResponse;
+    try {
+      JSONObject o = new JSONObject();
+      JSONObject uploadToken = new JSONObject();
+      uploadToken.put("uploadToken", uploadId);
+      JSONObject newMediaItems = new JSONObject();
+      newMediaItems.put("description", "Test Upload: "+mediaPath);
+      newMediaItems.put("simpleMediaItem", uploadToken);
+      o.put("newMediaItems", singletonList(newMediaItems));
+
+      jsonResponse = Unirest.post("https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate")
+          .header("content-type", "application/json")
+          .header("authorization", format("Bearer %s", credential.getAccessToken()))
+          .body(o)
+          .asString();
+
+    } catch (UnirestException e) {
+      throw new IOException(e);
+    }
+    LOG.info("response: {} [{}]", jsonResponse.getStatusText(), jsonResponse.getStatus());
+    return jsonResponse.getBody();
   }
 
   private String uploadBytes(Credential credential, String mediaPath) throws IOException {
