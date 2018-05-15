@@ -1,14 +1,21 @@
 package cc.photos.uploader;
 
 import static java.lang.String.format;
+import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.singletonList;
+import static org.apache.http.util.TextUtils.isEmpty;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +32,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
@@ -32,18 +40,147 @@ public class Uploader {
   private static final Logger LOG = LoggerFactory.getLogger(Uploader.class);
 
   public static void main(String[] args) throws Exception {
-    LOG.info("GPhoto Uploader Started.");
+    String toUpload = args[0];
+    LOG.info("GPhoto Uploader Started to upload [{}]", toUpload);
     Uploader u = new Uploader();
     Credential c = u.authorize();
     LOG.info( "Credential expires in secs: {}", c.getExpiresInSeconds());
-    u.upload(c, args[0]);
+    Path albumPath = u.getAlbumName(toUpload);
+    String albumId = u.resolveAlbumId(c, albumPath);
+    if(albumId != null) {
+      u.upload(c, albumId, toUpload);
+    } else {
+      LOG.error("unable to create album {}", albumPath);
+    }
   }
 
-  private void upload(Credential credential, String mediaPath) throws IOException {
+  private Path getAlbumName(String mediaFile) {
+    Path mediaPath = Paths.get(mediaFile);
+    return mediaPath.getParent();
+  }
+
+  /* assume album name looks like this: `2017/2017-01-01`; we only want the final portion */
+  private String resolveAlbumId(Credential credential, Path albumPath) throws IOException {
+    LOG.info("Getting album ID for [{}]", albumPath);
+    String albumName =  albumPath.getFileName().toString();
+    String albumId = lookupAlbumId(credential, albumName);
+    if(albumId == null) {
+      LOG.info("no album found with name: {}, creating.", albumName);
+      albumId = createAlbum(credential, albumName);
+    }
+    LOG.info("Found album ID {} for [{}]", albumId, albumPath);
+    return albumId;
+  }
+
+  private void upload(Credential credential, String albumId, String mediaPath) throws IOException {
     String uploadId = uploadBytes(credential, mediaPath);
     LOG.info("uploadId: {}", uploadId);
-    String response = addMediaItem(credential, uploadId, mediaPath);
+    String response = addMediaItem(credential, albumId, uploadId, mediaPath);
     LOG.info("Upload completed: {}", response);
+  }
+
+  private String lookupAlbumId(Credential credential, String albumName) throws IOException {
+    LOG.info("loooking up ID for album {}", albumName);
+    long start = currentTimeMillis();
+    Map<String,String> albums = listAlbums(credential);
+    long end = currentTimeMillis();
+    LOG.info("listAlbums took {}ms", (end-start));
+    return albums.get(albumName);
+  }
+
+  private Map<String,String> listAlbums(Credential credential) throws IOException {
+    Map<String,String> albums = new HashMap<>();
+    JSONObject responseBody;
+    String nextPageToken = null;
+    do {
+      try {
+        String url = "https://photoslibrary.googleapis.com/v1/albums?pageSize=50";
+        if(!isEmpty(nextPageToken)) {
+          url += "&pageToken=" + nextPageToken;
+        }
+        HttpResponse<JsonNode> jsonResponse = Unirest.get(url)
+            .header("accept", "application/json")
+            .header("authorization", format("Bearer %s", credential.getAccessToken()))
+            .asJson();
+        LOG.info("response: {} [{}]", jsonResponse.getStatusText(), jsonResponse.getStatus());
+        if(jsonResponse.getStatus() >= 400) {
+          LOG.error(jsonResponse.getBody().toString());
+          throw new IOException("request error: "+jsonResponse.getStatusText());
+        }
+        responseBody = jsonResponse.getBody().getObject();
+      } catch (UnirestException e) {
+        throw new IOException(e);
+      }
+      if(responseBody.has("albums")) {
+        populateAlbums(albums, responseBody.getJSONArray("albums"));
+        if(responseBody.has("nextPageToken")) {
+          nextPageToken = responseBody.getString("nextPageToken");
+        }
+      } else {
+        // end of pagination
+        nextPageToken = null;
+      }
+
+    } while(nextPageToken != null);
+    LOG.info("albums: {}", albums);
+    return albums;
+  }
+
+  private void populateAlbums(Map<String, String> albums, JSONArray albumInfo) {
+    for (int i=0; i<albumInfo.length(); i++) {
+      JSONObject item = albumInfo.getJSONObject(i);
+      String title = item.getString("title");
+      String id = item.getString("id");
+      LOG.info("title: {}", title);
+      albums.put(title, id);
+    }
+  }
+
+  //  POST https://photoslibrary.googleapis.com/v1/albums
+  //  Content-type: application/json
+  //  Authorization: Bearer OAUTH2_TOKEN
+  //
+  //  {
+  //    "album": {
+  //      "title": "New Album Title"
+  //    }
+  //  }
+  //
+  //  OK RESPONSE:
+  //  {
+  //    "productUrl": "URL_TO_OPEN_IN_GOOGLE_PHOTOS ",
+  //    "id": "ALBUM_ID",
+  //    "title": "New Album Title",
+  //    "isWriteable": "WHETHER_YOU_CAN_WRITE_TO_THIS_ALBUM"
+  //  }
+  private static String createAlbum(Credential credential, String albumName) throws IOException {
+    LOG.info("Creating an album with name: {}", albumName);
+    HttpResponse<JsonNode> jsonResponse;
+
+    JSONObject album = new JSONObject();
+    try {
+      JSONObject title = new JSONObject();
+      album.put("album", title);
+      title.put("title", albumName);
+
+      jsonResponse = Unirest.post("https://photoslibrary.googleapis.com/v1/albums")
+          .header("content-type", "application/json")
+          .header("authorization", format("Bearer %s", credential.getAccessToken()))
+          .body(album)
+          .asJson();
+
+    } catch (UnirestException e) {
+      throw new IOException(e);
+    }
+    LOG.info("response: {} [{}]", jsonResponse.getStatusText(), jsonResponse.getStatus());
+    int status = jsonResponse.getStatus();
+    if(status >= 200 && status < 300) {
+      LOG.info("album {} created successfully", albumName);
+      return jsonResponse.getBody().getObject().getString("id");
+    } else {
+      LOG.info("album not created.  response was: ", jsonResponse.getBody().getObject().toString());
+      return null;
+    }
   }
 
   //    POST https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate
@@ -51,6 +188,7 @@ public class Uploader {
   //    Authorization: Bearer OAUTH2_TOKEN
   //
   //    {
+  //      "albumId": "ALBUM_ID",
   //      "newMediaItems": [
   //        {
   //          "description": "ITEM_DESCRIPTIOM",
@@ -83,7 +221,7 @@ public class Uploader {
   //       ]
   //    }
 
-  private String addMediaItem(Credential credential, String uploadId, String mediaPath) throws IOException {
+  private String addMediaItem(Credential credential, String albumId, String uploadId, String mediaPath) throws IOException {
     HttpResponse<String> jsonResponse;
     try {
       JSONObject o = new JSONObject();
@@ -93,6 +231,9 @@ public class Uploader {
       newMediaItems.put("description", "Test Upload: "+mediaPath);
       newMediaItems.put("simpleMediaItem", uploadToken);
       o.put("newMediaItems", singletonList(newMediaItems));
+      o.put("albumId", albumId);
+
+      LOG.info("posting request to addMediaItem: {}", o.toString());
 
       jsonResponse = Unirest.post("https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate")
           .header("content-type", "application/json")
