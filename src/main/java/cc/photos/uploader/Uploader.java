@@ -153,7 +153,7 @@ public class Uploader {
   //    "title": "New Album Title",
   //    "isWriteable": "WHETHER_YOU_CAN_WRITE_TO_THIS_ALBUM"
   //  }
-  private static String createAlbum(Credential credential, String albumName) throws IOException {
+  private String createAlbum(Credential credential, String albumName) throws IOException {
     LOG.info("Creating an album with name: {}", albumName);
     HttpResponse<JsonNode> jsonResponse;
 
