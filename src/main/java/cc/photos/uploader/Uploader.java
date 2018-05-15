@@ -275,7 +275,7 @@ public class Uploader {
 
   private Credential authorize() throws Exception {
     JsonFactory jsonFactory =  new JacksonFactory();
-    ClientSecret clientSecret = readClientSecret(jsonFactory);
+    ClientSecret clientSecret = readClientSecret();
     AuthorizationCodeFlow flow = new AuthorizationCodeFlow.Builder(
         BearerToken.authorizationHeaderAccessMethod(),
         new NetHttpTransport(),
@@ -293,7 +293,7 @@ public class Uploader {
     return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
   }
 
-  private ClientSecret readClientSecret(JsonFactory jsonFactory) throws IOException {
+  private ClientSecret readClientSecret() throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     String clientSecretJson = "/client-secret.json";
 
