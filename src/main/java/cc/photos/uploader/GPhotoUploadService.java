@@ -232,8 +232,6 @@ public class GPhotoUploadService {
     }
   }
 
-
-
   public void authorize(String secretsFile) throws IOException {
     JsonFactory jsonFactory =  new JacksonFactory();
     ClientSecret clientSecret = readClientSecret(secretsFile);
