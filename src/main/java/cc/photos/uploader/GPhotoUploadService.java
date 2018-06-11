@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -257,8 +258,9 @@ public class GPhotoUploadService {
   private ClientSecret readClientSecret(String secretsFile) throws IOException {
       ObjectMapper mapper = new ObjectMapper();
 
-      InputStream is = Uploader.class.getResourceAsStream(secretsFile);
-      return mapper.readValue(is, ClientSecret.class);
+      try (InputStream is = new BufferedInputStream(new FileInputStream(secretsFile))) {
+        return mapper.readValue(is, ClientSecret.class);
+      }
   }
 
   class LocalhostReceiver extends AbstractPromptReceiver {
