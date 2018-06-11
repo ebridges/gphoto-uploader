@@ -1,0 +1,13 @@
+GPhoto Uploader.
+
+Usage:
+    gphoto-uploader upload --file=FILE --credentials=FILE [--verbose]
+    gphoto-uploader (-h | --help)
+    gphoto-uploader --version
+
+Options:
+    --file=FILE           Image or video file to upload.
+    --credentials=FILE    Path to client-secrets.json file.
+    -h --help             Show this screen.
+    --version             Show version.
+    --verbose             Enable verbose logging.

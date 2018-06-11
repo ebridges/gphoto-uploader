@@ -15,7 +15,7 @@ dependencies {
     compile group: 'com.google.api-client', name: 'google-api-client', version: '1.23.0'
     compile "com.google.oauth-client:google-oauth-client-java6:1.23.0"
     compile "com.fasterxml.jackson.core:jackson-databind:2.9.5"
-
+    compile 'com.offbytwo:docopt:0.6.0.20150202'
     compile group: 'commons-io', name: 'commons-io', version: '2.5'
     compile "com.mashape.unirest:unirest-java:1.4.9"
 
