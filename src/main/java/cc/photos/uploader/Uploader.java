@@ -17,6 +17,9 @@ public class Uploader {
   private GPhotoUploadService uploadService = new GPhotoUploadService();
 
   public void authorize(String secretsFile) throws IOException {
+    if(LOG.isInfoEnabled()) {
+      LOG.info("authorizing client with credentials: {}", secretsFile);
+    }
     this.uploadService.authorize(secretsFile);
   }
 
