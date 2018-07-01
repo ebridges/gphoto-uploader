@@ -1,5 +1,6 @@
 package cc.photos.uploader;
 
+import com.google.common.base.Stopwatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,8 +8,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-
-import static java.lang.System.currentTimeMillis;
 
 @SuppressWarnings("WeakerAccess")
 public class Uploader {
@@ -51,12 +50,14 @@ public class Uploader {
 
   private String lookupAlbumId(String albumName) throws IOException {
     LOG.info("loooking up ID for album {}", albumName);
-    long start = currentTimeMillis();
+    Stopwatch timer = Stopwatch.createStarted();
     if(ALBUM_CACHE.isEmpty()) {
       ALBUM_CACHE = uploadService.listAlbums();
     }
-    long end = currentTimeMillis();
-    LOG.info("listAlbums took {}ms", (end-start));
+    timer.stop();
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("listAlbums took {}", timer);
+    }
     return ALBUM_CACHE.get(albumName);
   }
 }
