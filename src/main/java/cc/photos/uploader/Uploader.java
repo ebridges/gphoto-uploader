@@ -10,6 +10,7 @@ import java.util.Map;
 
 import static java.lang.System.currentTimeMillis;
 
+@SuppressWarnings("WeakerAccess")
 public class Uploader {
   private static final Logger LOG = LoggerFactory.getLogger(Uploader.class);
   private Map<String,String> ALBUM_CACHE = new HashMap<>();
@@ -17,15 +18,15 @@ public class Uploader {
   private GPhotoUploadService uploadService = new GPhotoUploadService();
 
   public void authorize(String secretsFile) throws IOException {
-    if(LOG.isInfoEnabled()) {
-      LOG.info("authorizing client with credentials: {}", secretsFile);
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("authorizing client with credentials: {}", secretsFile);
     }
     this.uploadService.authorize(secretsFile);
   }
 
   /* assume album name looks like this: `2017/2017-01-01`; we only want the final portion */
   public String resolveAlbumId(Path albumPath) throws IOException {
-    LOG.info("Getting album ID for [{}]", albumPath);
+    LOG.debug("Getting album ID for [{}]", albumPath);
     String albumName =  albumPath.getFileName().toString();
     String albumId;
     synchronized (this) {

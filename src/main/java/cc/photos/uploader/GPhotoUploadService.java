@@ -94,7 +94,9 @@ public class GPhotoUploadService {
       o.put("newMediaItems", singletonList(newMediaItems));
       o.put("albumId", albumId);
 
-      LOG.info("posting request to addMediaItem: {}", o.toString());
+      if(LOG.isDebugEnabled()) {
+        LOG.debug("posting request to addMediaItem: {}", o);
+      }
 
       jsonResponse = Unirest.post("https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate")
           .header("content-type", "application/json")
@@ -105,7 +107,9 @@ public class GPhotoUploadService {
     } catch (UnirestException e) {
       throw new IOException(e);
     }
-    LOG.info("response: {} [{}]", jsonResponse.getStatusText(), jsonResponse.getStatus());
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("response: {} [{}]", jsonResponse.getStatusText(), jsonResponse.getStatus());
+    }
     return jsonResponse.getBody();
   }
 
@@ -124,7 +128,9 @@ public class GPhotoUploadService {
     } catch (UnirestException e) {
       throw new IOException(e);
     }
-    LOG.info("response: {} [{}]", jsonResponse.getStatusText(), jsonResponse.getStatus());
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("response: {} [{}]", jsonResponse.getStatusText(), jsonResponse.getStatus());
+    }
     return jsonResponse.getBody();
   }
 
@@ -153,7 +159,9 @@ public class GPhotoUploadService {
   //    "isWriteable": "WHETHER_YOU_CAN_WRITE_TO_THIS_ALBUM"
   //  }
   public String createAlbum(String albumName) throws IOException {
-    LOG.info("Creating an album with name: {}", albumName);
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("Creating an album with name: {}", albumName);
+    }
     HttpResponse<JsonNode> jsonResponse;
 
     JSONObject album = new JSONObject();
@@ -171,13 +179,19 @@ public class GPhotoUploadService {
     } catch (UnirestException e) {
       throw new IOException(e);
     }
-    LOG.info("response: {} [{}]", jsonResponse.getStatusText(), jsonResponse.getStatus());
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("response: {} [{}]", jsonResponse.getStatusText(), jsonResponse.getStatus());
+    }
     int status = jsonResponse.getStatus();
     if(status >= 200 && status < 300) {
-      LOG.info("album {} created successfully", albumName);
+      if(LOG.isDebugEnabled()) {
+        LOG.debug("album {} created successfully", albumName);
+      }
       return jsonResponse.getBody().getObject().getString("id");
     } else {
-      LOG.info("album not created.  response was: ", jsonResponse.getBody().getObject().toString());
+      if(LOG.isDebugEnabled()) {
+        LOG.debug("album not created.  response was: {}", jsonResponse.getBody().getObject());
+      }
       return null;
     }
   }
@@ -198,7 +212,9 @@ public class GPhotoUploadService {
             .header("accept", "application/json")
             .header("authorization", format("Bearer %s", credential.getAccessToken()))
             .asJson();
-        LOG.info("response: {} [{}]", jsonResponse.getStatusText(), jsonResponse.getStatus());
+        if(LOG.isDebugEnabled()) {
+          LOG.debug("response: {} [{}]", jsonResponse.getStatusText(), jsonResponse.getStatus());
+        }
         if (jsonResponse.getStatus() >= 400) {
           LOG.error(jsonResponse.getBody().toString());
           throw new IOException("request error: " + jsonResponse.getStatusText());
@@ -219,7 +235,9 @@ public class GPhotoUploadService {
 
     } while (nextPageToken != null);
 
-    LOG.info("albums: {}", albums);
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("albums: {}", albums);
+    }
     return albums;
   }
 
@@ -228,7 +246,9 @@ public class GPhotoUploadService {
       JSONObject item = albumInfo.getJSONObject(i);
       String title = item.getString("title");
       String id = item.getString("id");
-      LOG.info("title: {}", title);
+      if(LOG.isDebugEnabled()) {
+        LOG.debug("title: {}", title);
+      }
       albums.put(title, id);
     }
   }
@@ -252,7 +272,7 @@ public class GPhotoUploadService {
     VerificationCodeReceiver receiver = new LocalhostReceiver();
     AuthorizationCodeInstalledApp app = new AuthorizationCodeInstalledApp(flow, receiver);
     this.credential = app.authorize("user");
-    LOG.info( "Credential expires in secs: {}", credential.getExpiresInSeconds());
+    LOG.info( "Upload authorized. Credential expires in: {}s", credential.getExpiresInSeconds());
   }
 
   private ClientSecret readClientSecret(String secretsFile) throws IOException {
