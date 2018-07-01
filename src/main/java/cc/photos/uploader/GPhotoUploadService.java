@@ -1,5 +1,6 @@
 package cc.photos.uploader;
 
+import cc.photos.uploader.util.ClientSecret;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.BearerToken;

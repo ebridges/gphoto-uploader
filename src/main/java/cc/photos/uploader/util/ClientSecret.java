@@ -1,4 +1,4 @@
-package cc.photos.uploader;
+package cc.photos.uploader.util;
 
 import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
 import com.google.api.client.http.GenericUrl;

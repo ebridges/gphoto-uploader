@@ -1,4 +1,4 @@
-package cc.photos.uploader;
+package cc.photos.uploader.util;
 
 public class Counter {
   private int count;

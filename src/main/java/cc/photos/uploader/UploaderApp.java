@@ -1,5 +1,6 @@
 package cc.photos.uploader;
 
+import cc.photos.uploader.util.Counter;
 import ch.qos.logback.classic.Level;
 import com.google.common.base.Stopwatch;
 import org.docopt.Docopt;

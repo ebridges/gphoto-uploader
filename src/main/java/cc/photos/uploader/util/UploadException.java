@@ -1,4 +1,4 @@
-package cc.photos.uploader;
+package cc.photos.uploader.util;
 
 public class UploadException extends RuntimeException {
   public UploadException(String message, Throwable cause) {

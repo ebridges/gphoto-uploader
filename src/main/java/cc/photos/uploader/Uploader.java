@@ -1,5 +1,6 @@
 package cc.photos.uploader;
 
+import cc.photos.uploader.util.UploadException;
 import com.google.common.base.Stopwatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
