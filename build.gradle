@@ -2,6 +2,9 @@ group 'cc.roja.photos'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'cc.photos.uploader.UploaderApp'
 
 sourceCompatibility = 1.8
 
