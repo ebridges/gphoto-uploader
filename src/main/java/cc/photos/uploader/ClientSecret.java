@@ -4,6 +4,24 @@ import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.util.Key;
 
+/*
+E.g.:
+
+{
+   "web" : {
+      "client_id" : "abcdef",
+      "auth_provider_x509_cert_url" : "https://www.googleapis.com/oauth2/v1/certs",
+      "client_secret" : "abcdef",
+      "project_id" : "abcdef",
+      "redirect_uris" : [
+         "http://localhost:8000/"
+      ],
+      "auth_uri" : "https://accounts.google.com/o/oauth2/auth",
+      "token_uri" : "https://accounts.google.com/o/oauth2/token"
+   }
+}
+ */
+
 public class ClientSecret {
   @Key public Web web;
 
@@ -38,6 +56,7 @@ class Web {
   @Key public String auth_uri;
   @Key public String token_uri;
   @Key public String auth_provider_x509_cert_url;
+  @Key public String[] redirect_uris;
 
   Web() {
   }
