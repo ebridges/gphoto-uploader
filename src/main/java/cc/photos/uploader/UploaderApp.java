@@ -6,11 +6,15 @@ import org.docopt.Docopt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static java.lang.Boolean.parseBoolean;
 import static java.util.stream.Collectors.toMap;
@@ -28,29 +32,27 @@ public class UploaderApp {
     Stopwatch timer = Stopwatch.createStarted();
     Counter counter = new Counter();
     Map<String, String> opts = parseOpts(args);
+    LOG.info("GPhoto Uploader Started to upload [{}]", opts.get(OPT_FILE));
 
     Uploader u = new Uploader();
     u.authorize(opts.get(OPT_CREDENTIALS));
 
-    LOG.info("GPhoto Uploader Started to upload [{}]", opts.get(OPT_FILE));
-    String[] imagesToUpload = opts.get(OPT_FILE).split("\\s*,\\s*");
-
-    for(String toUpload : imagesToUpload) {
-      Path albumPath = UploaderApp.getAlbumName(toUpload);
-      String albumId = u.resolveAlbumId(albumPath);
-      if (albumId != null) {
-        u.upload(albumId, toUpload);
-      } else {
-        LOG.error("unable to create album {}", albumPath);
-      }
-    }
+    Stream<Path> pathsToUpload = streamInput(opts.get(OPT_FILE));
+    pathsToUpload.forEach( (image) -> {
+      u.upload(image);
+      counter.incr();
+    });
     timer.stop();
     LOG.info("Upload of "+counter+" files completed. ["+timer+"]");
   }
 
-  private static Path getAlbumName(String mediaFile) {
-    Path mediaPath = Paths.get(mediaFile);
-    return mediaPath.getParent();
+  private static Stream<Path> streamInput(String files) {
+    if(null != files && !files.isEmpty()) {
+      return Arrays.stream(files.split("\\s*,\\s*")).map( (p) -> Paths.get(p) );
+    } else {
+      BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+      return in.lines().map( (p) -> Paths.get(p) );
+    }
   }
 
   private static Map<String, String> parseOpts(String[] args) throws IOException {

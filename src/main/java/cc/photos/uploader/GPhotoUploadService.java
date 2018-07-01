@@ -26,6 +26,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -82,7 +84,7 @@ public class GPhotoUploadService {
   //       ]
   //    }
 
-  public String addMediaItem(String albumId, String uploadId, String mediaPath) throws IOException {
+  public String addMediaItem(String albumId, String uploadId, Path mediaPath) throws IOException {
     HttpResponse<String> jsonResponse;
     try {
       JSONObject o = new JSONObject();
@@ -113,16 +115,15 @@ public class GPhotoUploadService {
     return jsonResponse.getBody();
   }
 
-  public String uploadBytes(String mediaPath) throws IOException {
-    File fromFile = new File(mediaPath);
-    byte[] mediaBytes = readBytes(fromFile);
+  public String uploadBytes(Path mediaPath) throws IOException {
+    byte[] mediaBytes = readBytes(mediaPath);
     HttpResponse<String> jsonResponse;
     try {
       jsonResponse = Unirest.post("https://photoslibrary.googleapis.com/v1/uploads")
           .header("content-type", "application/octet-stream")
           .header("accept", "application/json")
           .header("authorization", format("Bearer %s", credential.getAccessToken()))
-          .header("X-Goog-Upload-File-Name", mediaPath)
+          .header("X-Goog-Upload-File-Name", mediaPath.getFileName().toString())
           .body(mediaBytes)
           .asString();
     } catch (UnirestException e) {
@@ -134,8 +135,8 @@ public class GPhotoUploadService {
     return jsonResponse.getBody();
   }
 
-  private static byte[] readBytes(File mediaPath) throws IOException {
-    try(InputStream is = new FileInputStream(mediaPath)) {
+  private static byte[] readBytes(Path mediaPath) throws IOException {
+    try(InputStream is = Files.newInputStream(mediaPath)) {
       return IOUtils.toByteArray(is);
     }
   }

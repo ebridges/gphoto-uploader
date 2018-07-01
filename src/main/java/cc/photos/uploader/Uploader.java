@@ -24,28 +24,47 @@ public class Uploader {
   }
 
   /* assume album name looks like this: `2017/2017-01-01`; we only want the final portion */
-  public String resolveAlbumId(Path albumPath) throws IOException {
+  private String resolveAlbumId(Path albumPath) {
     LOG.debug("Getting album ID for [{}]", albumPath);
     String albumName =  albumPath.getFileName().toString();
     String albumId;
-    synchronized (this) {
-      albumId = lookupAlbumId(albumName);
-      if (albumId == null) {
-        LOG.info("no album found with name: {}, creating.", albumName);
-        albumId = uploadService.createAlbum(albumName);
-        ALBUM_CACHE.put(albumName, albumId);
+    try {
+      synchronized (this) {
+        albumId = lookupAlbumId(albumName);
+        if (albumId == null) {
+          LOG.debug("no album found with name: {}, creating.", albumName);
+          albumId = uploadService.createAlbum(albumName);
+          ALBUM_CACHE.put(albumName, albumId);
+        }
       }
-      assert albumId != null;
+    } catch (IOException e) {
+      throw new IllegalStateException("unable to create album: "+albumPath, e);
     }
-    LOG.info("Found album ID {} for [{}]", albumId, albumPath);
+    assert albumId != null;
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("Found album ID {} for [{}]", albumId, albumPath);
+    }
     return albumId;
   }
 
-  public void upload(String albumId, String mediaPath) throws IOException {
-    String uploadId = uploadService.uploadBytes(mediaPath);
-    LOG.info("uploadId: {}", uploadId);
-    String response = uploadService.addMediaItem(albumId, uploadId, mediaPath);
-    LOG.info("Upload completed: {}", response);
+  public void upload(Path mediaPath) {
+    Stopwatch timer = Stopwatch.createStarted();
+    String albumId = resolveAlbumId(mediaPath.getParent());
+    String uploadId;
+    try {
+      uploadId = uploadService.uploadBytes(mediaPath);
+      LOG.debug("uploadId: {}", uploadId);
+    } catch (IOException e) {
+      throw new UploadException("Error uploading media file ["+mediaPath+"].", e);
+    }
+    try {
+      String response = uploadService.addMediaItem(albumId, uploadId, mediaPath);
+      LOG.debug("Upload completed: {}", response);
+    } catch (IOException e) {
+      throw new UploadException("Error adding media file to album ["+mediaPath+"].", e);
+    }
+    timer.stop();
+    LOG.info("media file [{}] uploaded to album [{}] in [{}]", mediaPath, mediaPath.getParent(), timer);
   }
 
   private String lookupAlbumId(String albumName) throws IOException {
