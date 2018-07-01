@@ -71,7 +71,7 @@ public class UploaderApp {
           .entrySet()
           .stream()
           .collect(
-              toMap(Map.Entry::getKey, e -> e.getValue().toString())
+              toMap(Map.Entry::getKey, e -> e.getValue() != null ? e.getValue().toString() : "")
           );
 
       // handle verbose arg
