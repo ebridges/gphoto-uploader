@@ -1,6 +1,7 @@
 package cc.photos.uploader;
 
 import ch.qos.logback.classic.Level;
+import com.google.common.base.Stopwatch;
 import org.docopt.Docopt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,8 @@ public class UploaderApp {
   private static final String OPT_VERBOSE = "--verbose";
 
   public static void main(String[] args) throws Exception {
+    Stopwatch timer = Stopwatch.createStarted();
+    Counter counter = new Counter();
     Map<String, String> opts = parseOpts(args);
 
     Uploader u = new Uploader();
@@ -41,6 +44,8 @@ public class UploaderApp {
         LOG.error("unable to create album {}", albumPath);
       }
     }
+    timer.stop();
+    LOG.info("Upload of "+counter+" files completed. ["+timer+"]");
   }
 
   private static Path getAlbumName(String mediaFile) {
