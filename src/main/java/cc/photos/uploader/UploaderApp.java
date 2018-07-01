@@ -57,6 +57,10 @@ public class UploaderApp {
   }
 
   private static Map<String, String> parseOpts(String[] args) throws IOException {
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("Args: {}", Arrays.toString(args));
+    }
+
     try(InputStream is = UploaderApp.class.getResourceAsStream(USAGE)) {
       Map<String, String> opts = new Docopt(is)
           .withVersion(VERSION)
