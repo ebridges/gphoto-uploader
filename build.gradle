@@ -12,6 +12,12 @@ mainClassName = 'cc.photos.uploader.UploaderApp'
 
 sourceCompatibility = 1.8
 
+release {
+    git {
+        signTag = true
+    }
+}
+
 repositories {
     mavenCentral()
 }
