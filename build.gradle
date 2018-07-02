@@ -19,12 +19,7 @@ release {
 }
 
 uploadArchives {
-    repositories.mavenDeployer {
-//        configuration = configurations.deployerJars
-        repository(url: "scp://nas/archive/mvn-repository") {
-            authentication(privateKey: "/Users/ebridges/.ssh/id_rsa")
-        }
-    }
+    // @todo needs configuration
 }
 
 configurations {
