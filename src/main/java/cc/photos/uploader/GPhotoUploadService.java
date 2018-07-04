@@ -5,12 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.auth.oauth2.DataStoreCredentialRefreshListener;
 import com.google.api.client.extensions.java6.auth.oauth2.AbstractPromptReceiver;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.java6.auth.oauth2.VerificationCodeReceiver;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
@@ -256,20 +258,23 @@ public class GPhotoUploadService {
   }
 
   public void authorize(String secretsFile) throws IOException {
+    DataStoreFactory dataStoreFactory = new FileDataStoreFactory(new File("./datastore"));
     JsonFactory jsonFactory =  new JacksonFactory();
     ClientSecret clientSecret = readClientSecret(secretsFile);
     AuthorizationCodeFlow flow = new AuthorizationCodeFlow.Builder(
-      BearerToken.authorizationHeaderAccessMethod(),
-      new NetHttpTransport(),
-      jsonFactory,
-      clientSecret.getTokenUri(),
-      clientSecret.getAuthParameters(),
-      clientSecret.getClientId(),
-      clientSecret.getAuthUri().build()).setScopes(singletonList(
-      // List of scopes:
-      // https://developers.google.com/photos/library/guides/authentication-authorization?authuser=1
-      "https://www.googleapis.com/auth/photoslibrary"
-    )).setDataStoreFactory(new FileDataStoreFactory(new File("./datastore"))).build();
+        BearerToken.authorizationHeaderAccessMethod(),
+        new NetHttpTransport(),
+        jsonFactory,
+        clientSecret.getTokenUri(),
+        clientSecret.getAuthParameters(),
+        clientSecret.getClientId(),
+        clientSecret.getAuthUri().build()).setScopes(singletonList(
+        // List of scopes:
+        // https://developers.google.com/photos/library/guides/authentication-authorization?authuser=1
+        "https://www.googleapis.com/auth/photoslibrary"
+      )).setDataStoreFactory(dataStoreFactory) // unnecessary?
+        .addRefreshListener(new DataStoreCredentialRefreshListener("gphoto-uploader", dataStoreFactory))
+        .build();
 
     VerificationCodeReceiver receiver = new LocalhostReceiver();
     AuthorizationCodeInstalledApp app = new AuthorizationCodeInstalledApp(flow, receiver);
