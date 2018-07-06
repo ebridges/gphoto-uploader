@@ -19,3 +19,7 @@ Options:
     --version             Show version.
     --verbose             Enable verbose logging.
 ```
+
+## Releasing
+
+`./gradlew clean build release`
