@@ -1,5 +1,3 @@
-group 'cc.roja.photos'
-
 plugins {
     id 'net.researchgate.release' version '2.6.0'
 }
@@ -8,6 +6,8 @@ repositories {
     mavenCentral()
     jcenter()
 }
+
+group 'cc.roja.photos'
 
 apply plugin: 'java'
 apply plugin: 'application'
