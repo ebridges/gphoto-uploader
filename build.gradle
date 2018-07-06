@@ -37,6 +37,23 @@ distTar {
     compression = Compression.GZIP
 }
 
+// don't include the windows `*.bat` file
+startScripts {
+    doLast {
+        delete windowsScript
+    }
+}
+
+// don't include the `*.zip` archives
+distZip.enabled = false
+task deleteZip {
+    configurations.archives.artifacts.removeAll {it.file =~ 'zip'}
+}
+tasks.install.dependsOn(deleteZip)
+
+// remove lingering `*.tar` archives
+configurations.archives.artifacts.removeAll {it.file =~ 'tar'}
+
 release {
     git {
         signTag = true
