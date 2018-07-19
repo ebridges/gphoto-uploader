@@ -52,7 +52,7 @@ task deleteZip {
 tasks.install.dependsOn(deleteZip)
 
 // remove lingering `*.tar` && `*.jar` archives
-configurations.archives.artifacts.removeAll {it.file =~ 'tar' || it.file =~ 'jar'}
+configurations.archives.artifacts.removeAll {it.file =~ 'tar'}
 
 release {
     git {
