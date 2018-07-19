@@ -69,7 +69,7 @@ task deployJar(type: Jar)
 uploadArchives {
     repositories.mavenDeployer {
         configuration = configurations.deployerJars
-        repository(url: sprintf('scp://%s/%s', properties.getProperty('deploy.hostname'), properties.getProperty('deploy.publish_folder'))) {
+        repository(url: sprintf('file://%s', properties.getProperty('deploy.publish_folder'))) {
             authentication(userName: properties.getProperty('deploy.username'), privateKey: properties.getProperty('deploy.private_key'))
         }
     }
