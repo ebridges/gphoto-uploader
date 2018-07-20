@@ -14,7 +14,7 @@ apply plugin: 'maven'
 apply plugin: 'application'
 
 mainClassName = 'cc.photos.uploader.UploaderApp'
-sourceCompatibility = 1.8
+sourceCompatibility = 1.10
 
 configurations {
     deployerJars
