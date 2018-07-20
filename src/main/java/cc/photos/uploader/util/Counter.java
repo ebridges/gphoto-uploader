@@ -1,17 +1,19 @@
 package cc.photos.uploader.util;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Counter {
-  private int count;
+  private AtomicInteger count;
 
   public Counter() {
-    this.count = 0;
+    this.count = new AtomicInteger(0);
   }
 
-  public void incr() {
-    this.count++;
+  public int incr() {
+    return this.count.incrementAndGet();
   }
 
   public String toString() {
-    return String.valueOf(count);
+    return String.valueOf(count.get());
   }
 }
