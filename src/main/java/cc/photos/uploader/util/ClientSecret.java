@@ -8,7 +8,7 @@ import com.google.api.client.util.Key;
 E.g.:
 
 {
-   "web" : {
+   "installed" : {
       "client_id" : "abcdef",
       "auth_provider_x509_cert_url" : "https://www.googleapis.com/oauth2/v1/certs",
       "client_secret" : "abcdef",
@@ -23,33 +23,33 @@ E.g.:
  */
 
 public class ClientSecret {
-  @Key public Web web;
+  @Key public Installed installed;
 
   public ClientSecret() {
-    this.web = new Web();
+    this.installed = new Installed();
   }
 
   public ClientParametersAuthentication getAuthParameters() {
     return new ClientParametersAuthentication(
-        this.web.client_id,
-        this.web.client_secret
+        this.installed.client_id,
+        this.installed.client_secret
     );
   }
 
   public String getClientId() {
-    return this.web.client_id;
+    return this.installed.client_id;
   }
 
   public GenericUrl getAuthUri() {
-    return new GenericUrl(this.web.auth_uri);
+    return new GenericUrl(this.installed.auth_uri);
   }
 
   public GenericUrl getTokenUri() {
-    return new GenericUrl(this.web.token_uri);
+    return new GenericUrl(this.installed.token_uri);
   }
 }
 
-class Web {
+class Installed {
   @Key public String client_id;
   @Key public String client_secret;
   @Key public String project_id;
@@ -58,6 +58,6 @@ class Web {
   @Key public String auth_provider_x509_cert_url;
   @Key public String[] redirect_uris;
 
-  Web() {
+  Installed() {
   }
 }
