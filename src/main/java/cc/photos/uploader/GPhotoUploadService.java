@@ -86,6 +86,9 @@ public class GPhotoUploadService {
   //    }
 
   public String addMediaItem(String albumId, String uploadId, Path mediaPath) throws IOException {
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("addMediaItem called for {}", mediaPath);
+    }
     HttpResponse<String> jsonResponse;
     try {
       JSONObject o = new JSONObject();
@@ -117,6 +120,9 @@ public class GPhotoUploadService {
   }
 
   public String uploadBytes(Path mediaPath) throws IOException {
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("uploadBytes called for {}", mediaPath);
+    }
     byte[] mediaBytes = readBytes(mediaPath);
     HttpResponse<String> jsonResponse;
     try {
@@ -199,6 +205,9 @@ public class GPhotoUploadService {
   }
 
   public Map<String,String> listAlbums() throws IOException {
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("listAlbums() called.");
+    }
     JSONObject responseBody;
     String nextPageToken = null;
     Map<String,String> albums = new HashMap<>();
@@ -244,6 +253,9 @@ public class GPhotoUploadService {
   }
 
   private void populateAlbums(Map<String,String> albums, JSONArray albumInfo) {
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("populateAlbums called.");
+    }
     for (int i=0; i<albumInfo.length(); i++) {
       JSONObject item = albumInfo.getJSONObject(i);
       String title = item.getString("title");
@@ -256,6 +268,9 @@ public class GPhotoUploadService {
   }
 
   public void authorize(String secretsFile) throws IOException {
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("authorize() called.");
+    }
     JsonFactory jsonFactory =  new JacksonFactory();
     ClientSecret clientSecret = readClientSecret(secretsFile);
     AuthorizationCodeFlow flow = new AuthorizationCodeFlow.Builder(
