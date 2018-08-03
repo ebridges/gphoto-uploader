@@ -131,6 +131,7 @@ public class GPhotoUploadService {
           .header("accept", "application/json")
           .header("authorization", format("Bearer %s", credential.getAccessToken()))
           .header("X-Goog-Upload-File-Name", mediaPath.getFileName().toString())
+          .header("X-Goog-Upload-Protocol", "raw")
           .body(mediaBytes)
           .asString();
     } catch (UnirestException e) {

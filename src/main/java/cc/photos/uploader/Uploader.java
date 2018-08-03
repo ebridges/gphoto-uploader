@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+import static cc.photos.uploader.util.StringUtil.isNotEmpty;
+
 @SuppressWarnings("WeakerAccess")
 public class Uploader {
   private static final Logger LOG = LoggerFactory.getLogger(Uploader.class);
@@ -51,19 +53,23 @@ public class Uploader {
   public void upload(Path mediaPath) {
     Stopwatch timer = Stopwatch.createStarted();
     String albumId = resolveAlbumId(mediaPath.getParent());
-    String uploadId;
+    String uploadToken;
     try {
-      uploadId = uploadService.uploadBytes(mediaPath);
-      LOG.debug("uploadId: {}", uploadId);
+      uploadToken = uploadService.uploadBytes(mediaPath);
+      LOG.debug("uploadToken: {}", uploadToken);
     } catch (IOException e) {
       throw new UploadException("Error uploading media file ["+mediaPath+"].", e);
     }
-    try {
-      String response = uploadService.addMediaItem(albumId, uploadId, mediaPath);
-      LOG.debug("Upload completed: {}", response);
-    } catch (IOException e) {
-      throw new UploadException("Error adding media file to album ["+mediaPath+"].", e);
+
+    if(isNotEmpty(uploadToken)) {
+      try {
+        String response = uploadService.addMediaItem(albumId, uploadToken, mediaPath);
+        LOG.debug("Upload completed: {}", response);
+      } catch (IOException e) {
+        throw new UploadException("Error adding media file to album [" + mediaPath + "].", e);
+      }
     }
+
     timer.stop();
     LOG.info("media file [{}] uploaded to album [{}] in [{}]", mediaPath, mediaPath.getParent(), timer);
   }
