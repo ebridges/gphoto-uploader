@@ -12,3 +12,4 @@ datastore/
 **/client-secret.json
 
 deploy.properties
+build/
