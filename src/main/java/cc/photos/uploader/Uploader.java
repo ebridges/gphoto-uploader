@@ -2,6 +2,7 @@ package cc.photos.uploader;
 
 import cc.photos.uploader.util.UploadException;
 import com.google.common.base.Stopwatch;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,8 +10,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-
-import static cc.photos.uploader.util.StringUtil.isNotEmpty;
 
 @SuppressWarnings("WeakerAccess")
 public class Uploader {
@@ -40,7 +39,7 @@ public class Uploader {
           ALBUM_CACHE.put(albumName, albumId);
         }
       }
-    } catch (IOException e) {
+    } catch (Throwable e) {
       throw new IllegalStateException("unable to create album: "+albumPath, e);
     }
     assert albumId != null;
@@ -61,11 +60,11 @@ public class Uploader {
       throw new UploadException("Error uploading media file ["+mediaPath+"].", e);
     }
 
-    if(isNotEmpty(uploadToken)) {
+    if(uploadToken != null) {
       try {
-        String response = uploadService.addMediaItem(albumId, uploadToken, mediaPath);
+        JSONObject response = uploadService.addMediaItem(albumId, uploadToken, mediaPath);
         LOG.debug("Upload completed: {}", response);
-      } catch (IOException e) {
+      } catch (Throwable e) {
         throw new UploadException("Error adding media file to album [" + mediaPath + "].", e);
       }
     }
@@ -74,7 +73,7 @@ public class Uploader {
     LOG.info("media file [{}] uploaded to album [{}] in [{}]", mediaPath, mediaPath.getParent(), timer);
   }
 
-  private String lookupAlbumId(String albumName) throws IOException {
+  private String lookupAlbumId(String albumName) {
     LOG.info("loooking up ID for album {}", albumName);
     Stopwatch timer = Stopwatch.createStarted();
     if(ALBUM_CACHE.isEmpty()) {

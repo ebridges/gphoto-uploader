@@ -1,7 +1,5 @@
 package cc.photos.uploader.util;
 
-
-import io.github.openunirest.http.HttpMethod;
 import io.github.openunirest.http.HttpResponse;
 import io.github.openunirest.http.JsonNode;
 import io.github.openunirest.http.Unirest;
@@ -16,15 +14,14 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
-import static io.github.openunirest.http.HttpMethod.GET;
-import static io.github.openunirest.http.HttpMethod.POST;
 import static java.lang.String.format;
 
 public class UploadUtils implements AutoCloseable {
@@ -33,7 +30,6 @@ public class UploadUtils implements AutoCloseable {
   private static final int SC_TOO_MANY_REQUESTS = 429;
   private static final int SC_5XX = 500;
   private static final int SECONDS_TO_PAUSE_WHEN_TOO_MANY_REQUESTS = 30;
-
 
   private UploadUtils(HttpClient client) {
     Unirest.setHttpClient(client);
@@ -71,12 +67,20 @@ public class UploadUtils implements AutoCloseable {
 
   private static HttpRequestRetryHandler retryHandler() {
     return (exception, executionCount, context) -> {
+      if (executionCount >= 10) {
+        // Do not retry if over max retry count
+        return false;
+      }
+      if (exception != null) {
+        LOG.error("Caught error when attempting a retry.", exception);
+        return false;
+      }
       HttpClientContext clientContext = HttpClientContext.adapt(context);
       org.apache.http.HttpResponse response = clientContext.getResponse();
       if(response.getStatusLine().getStatusCode() == SC_TOO_MANY_REQUESTS) {
         // https://developers.google.com/photos/library/guides/best-practices#retrying-failed-requests
         if(LOG.isInfoEnabled()) {
-          LOG.info("Too many requests sleeping for {} seconds", SECONDS_TO_PAUSE_WHEN_TOO_MANY_REQUESTS);
+          LOG.info("Too many requests sleeping for {} seconds ({})", SECONDS_TO_PAUSE_WHEN_TOO_MANY_REQUESTS, executionCount);
         }
         try {
           TimeUnit.SECONDS.sleep(SECONDS_TO_PAUSE_WHEN_TOO_MANY_REQUESTS);
@@ -90,46 +94,81 @@ public class UploadUtils implements AutoCloseable {
     };
   }
 
-
-  public JSONObject makeJsonRequest(String method, String url, Map<String, String> headers) {
-    HttpMethod m = HttpMethod.valueOf(method);
-    return makeRequest(m, url, headers, Optional.empty(), JsonNode.class).getBody().getObject();
-  }
-
-  @SuppressWarnings("unused")
-  public String makeStringRequest(String method, String url, Map<String, String> headers) {
-    HttpMethod m = HttpMethod.valueOf(method);
-    return makeRequest(m, url, headers, Optional.empty(), String.class).getBody();
-  }
-
-  public JSONObject makeJsonRequest(String method, String url, Map<String, String> headers, Object body) {
-    HttpMethod m = HttpMethod.valueOf(method);
-    return makeRequest(m, url, headers, Optional.of(body), JsonNode.class).getBody().getObject();
-  }
-
-  public String makeStringRequest(String method, String url, Map<String, String> headers, Object body) {
-    HttpMethod m = HttpMethod.valueOf(method);
-    return makeRequest(m, url, headers, Optional.of(body), String.class).getBody();
-  }
-
-  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-  private <T> HttpResponse<T> makeRequest(HttpMethod method, String url, Map<String, String> headers, Optional<?> body, Class<T> responseType)  {
-    HttpResponse<T> response;
-    if(method == GET) {
-      response = Unirest.get(url).headers(headers).asObject(responseType);
-    } else if(method == POST) {
-      if(body.isPresent()) {
-        response = Unirest.post(url).headers(headers).body(body.get()).asObject(responseType);
-      } else {
-        response = Unirest.post(url).headers(headers).asObject(responseType);
-      }
-    } else {
-      throw new IllegalArgumentException("unsupported method: "+method.name());
-    }
+  public JSONObject get(String url, Map<String, String> headers, ResponseHandler<JSONObject, JsonNode> handler) {
     if(LOG.isDebugEnabled()) {
-      LOG.debug("response: {} [{}]", response.getStatusText(), response.getStatus());
+      logRequest("GET", url, headers);
     }
-    return response;
+    HttpResponse<JsonNode> response = Unirest.get(url).headers(headers).asJson();
+    if(LOG.isDebugEnabled()) {
+      logResponse(response, b->b.getObject().toString(2));
+    }
+    return handleResponse(response, handler);
+  }
+
+  public JSONObject post(String url, Map<String, String> headers, JSONObject body, ResponseHandler<JSONObject, JsonNode> handler) {
+    if(LOG.isDebugEnabled()) {
+      logRequest("POST", url, headers, body);
+    }
+    HttpResponse<JsonNode> response = Unirest.post(url).headers(headers).body(body).asJson();
+    if(LOG.isDebugEnabled()) {
+      logResponse(response, b->b.getObject().toString(2));
+    }
+    return handleResponse(response, handler);
+  }
+
+  public String post(String url, Map<String, String> headers, byte[] body, ResponseHandler<String, String> handler) {
+    if(LOG.isDebugEnabled()) {
+      logRequest("POST", url, headers);
+    }
+    HttpResponse<String> response = Unirest.post(url).headers(headers).body(body).asString();
+    if(LOG.isDebugEnabled()) {
+      logResponse(response, (s)->s);
+    }
+    return handleResponse(response, handler);
+  }
+
+  private <T,V> T handleResponse(HttpResponse<V> response, ResponseHandler<T, V> handler) {
+    if(response.getStatus() >= 400) {
+      throw new UploadException(response.getStatus(), response.getStatusText(), response.getBody().toString());
+    }
+
+    return handler.handleResponse(response);
+  }
+
+  private <T> void logResponse(HttpResponse<T> response, Function<T,String> renderBody) {
+    LOG.debug("response: {} [{}]", response.getStatusText(), response.getStatus());
+    LOG.debug("response headers:");
+    response.getHeaders().forEach(
+        (k,v) -> LOG.debug("    {}: {}", k, v)
+    );
+    LOG.debug("response body:");
+    LOG.debug("\n>    {}", renderBody.apply(response.getBody()));
+  }
+
+  private void logRequest(String method, String url, Map<String, String> headers) {
+    logRequest(method, url, headers, null);
+  }
+
+  private void logRequest(String method, String url, Map<String, String> headers, @Nullable JSONObject body) {
+    LOG.debug("request: ");
+    LOG.debug("    {} {}", method, url);
+    LOG.debug("request headers: ");
+    headers.forEach(
+        (k,v) -> LOG.debug("    {}: {}", k, v)
+    );
+    if(body != null) {
+      LOG.debug("request body: ");
+      LOG.debug("\n{}", body.toString(2));
+    }
+    LOG.debug("-----------------------------------------------------");
+  }
+
+  public interface ResponseHandler<T, V> {
+    T handleResponse(HttpResponse<V> response);
+  }
+
+  public static JSONObject defaultHandler(HttpResponse<JsonNode> response) {
+    return response.getBody().getObject();
   }
 
   @Override

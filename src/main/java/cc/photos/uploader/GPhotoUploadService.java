@@ -48,7 +48,7 @@ public class GPhotoUploadService {
 
   }
 
-  public String addMediaItem(String albumId, String uploadId, Path mediaPath) {
+  public JSONObject addMediaItem(String albumId, String uploadId, Path mediaPath) {
     if(LOG.isDebugEnabled()) {
       LOG.debug("addMediaItem called for {}", mediaPath);
     }
@@ -57,7 +57,7 @@ public class GPhotoUploadService {
     JSONObject uploadToken = new JSONObject();
     uploadToken.put("uploadToken", uploadId);
     JSONObject newMediaItems = new JSONObject();
-    newMediaItems.put("description", "Test Upload: "+mediaPath);
+    newMediaItems.put("description", mediaPath);
     newMediaItems.put("simpleMediaItem", uploadToken);
     o.put("newMediaItems", singletonList(newMediaItems));
     o.put("albumId", albumId);
@@ -71,7 +71,7 @@ public class GPhotoUploadService {
       if(LOG.isDebugEnabled()) {
         LOG.debug("posting request for addMediaItem: {}", o);
       }
-      return u.makeStringRequest("POST", "https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate", headers, o);
+      return u.post("https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate", headers, o, UploadUtils::defaultHandler);
     }
   }
 
@@ -85,14 +85,27 @@ public class GPhotoUploadService {
       Map<String, String> headers = headers(
           credential.getAccessToken(),
           contentTypeHeader("application/octet-stream"),
-          acceptHeader("application/json"),
           h("X-Goog-Upload-File-Name", mediaPath.getFileName().toString()),
           h("X-Goog-Upload-Protocol", "raw")
       );
       if(LOG.isDebugEnabled()) {
         LOG.debug("posting request for uploadBytes: {}", mediaPath);
       }
-      return u.makeStringRequest("POST", "https://photoslibrary.googleapis.com/v1/uploads", headers, mediaBytes);
+      UploadUtils.ResponseHandler<String,String> handler = (r) -> {
+        String uploadToken = null;
+        if(r.getBody() != null) {
+          if(LOG.isDebugEnabled()) {
+            LOG.debug("returning uploadToken from body");
+          }
+          uploadToken = r.getBody();
+        } else {
+          if(LOG.isDebugEnabled()) {
+            LOG.debug("no upload token found, file has already been uploaded.");
+          }
+        }
+        return uploadToken;
+      };
+      return u.post( "https://photoslibrary.googleapis.com/v1/uploads", headers, mediaBytes, handler);
     }
   }
 
@@ -124,7 +137,7 @@ public class GPhotoUploadService {
         LOG.debug("posting request for createAlbum: {}", albumName);
       }
 
-      response = u.makeJsonRequest("POST", "https://photoslibrary.googleapis.com/v1/albums", headers, album);
+      response = u.post("https://photoslibrary.googleapis.com/v1/albums", headers, album, UploadUtils::defaultHandler);
 
       if(response.has("id")) {
         if(LOG.isDebugEnabled()) {
@@ -160,7 +173,7 @@ public class GPhotoUploadService {
             acceptHeader("application/json")
         );
 
-        response = u.makeJsonRequest("GET", url, headers);
+        response = u.get(url, headers, UploadUtils::defaultHandler);
 
         if (response.has("albums")) {
           populateAlbums(albums, response.getJSONArray("albums"));
