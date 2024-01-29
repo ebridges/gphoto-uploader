@@ -23,12 +23,13 @@ import static java.util.stream.Collectors.toMap;
 public class UploaderApp {
   private static final Logger LOG = LoggerFactory.getLogger(UploaderApp.class);
   private static final String USAGE = "/usage.txt";
-  private static final String VERSION = "1.0";
+  private static final String VERSION = "1.6";
 
   private static final String OPT_FILE = "--file";
   private static final String OPT_CREDENTIALS = "--credentials";
   private static final String OPT_VERBOSE = "--verbose";
 
+  @SuppressWarnings("UnstableApiUsage")
   public static void main(String[] args) throws Exception {
     Stopwatch timer = Stopwatch.createStarted();
     Counter counter = new Counter();
@@ -49,10 +50,10 @@ public class UploaderApp {
 
   private static Stream<Path> streamInput(String files) {
     if(null != files && !files.isEmpty()) {
-      return Arrays.stream(files.split("\\s*,\\s*")).map( (p) -> Paths.get(p) );
+      return Arrays.stream(files.split("\\s*,\\s*")).map(Paths::get);
     } else {
       BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-      return in.lines().map( (p) -> Paths.get(p) );
+      return in.lines().map(Paths::get);
     }
   }
 
@@ -62,6 +63,9 @@ public class UploaderApp {
     }
 
     try(InputStream is = UploaderApp.class.getResourceAsStream(USAGE)) {
+      if (is == null) {
+        throw new IOException("Could not find usage file: " + USAGE);
+      }
       Map<String, String> opts = new Docopt(is)
           .withVersion(VERSION)
           .withHelp(true)
