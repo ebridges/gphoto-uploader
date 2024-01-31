@@ -7,10 +7,9 @@ import org.docopt.Docopt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -24,8 +23,7 @@ public class UploaderApp {
   private static final Logger LOG = LoggerFactory.getLogger(UploaderApp.class);
   private static final String USAGE = "/usage.txt";
   private static final String VERSION = "1.6";
-
-  private static final String OPT_FILE = "--file";
+  private static final String OPT_FILE = "--photo-list";
   private static final String OPT_CREDENTIALS = "--credentials";
   private static final String OPT_VERBOSE = "--verbose";
 
@@ -39,22 +37,15 @@ public class UploaderApp {
     Uploader u = new Uploader();
     u.authorize(opts.get(OPT_CREDENTIALS));
 
-    Stream<Path> pathsToUpload = streamInput(opts.get(OPT_FILE));
-    pathsToUpload.forEach( (image) -> {
-      u.upload(image);
-      counter.incr();
-    });
+    try (Stream<String> pathsToUpload = Files.lines(Paths.get(opts.get(OPT_FILE)))) {
+      pathsToUpload.map(Paths::get).forEach( (image) -> {
+        u.upload(image);
+        counter.incr();
+      });
+    }
+
     timer.stop();
     LOG.info("Upload of "+counter+" files completed. ["+timer+"]");
-  }
-
-  private static Stream<Path> streamInput(String files) {
-    if(null != files && !files.isEmpty()) {
-      return Arrays.stream(files.split("\\s*,\\s*")).map(Paths::get);
-    } else {
-      BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-      return in.lines().map(Paths::get);
-    }
   }
 
   private static Map<String, String> parseOpts(String[] args) throws IOException {
