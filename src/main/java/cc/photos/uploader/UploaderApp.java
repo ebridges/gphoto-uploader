@@ -139,6 +139,7 @@ public class UploaderApp {
             }
         } catch (IOException e) {
             System.err.printf("Error loading %s.\n", filename);
+            //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
     }
