@@ -34,8 +34,8 @@
         </configuration>
         <executions>
           <execution>
-            <id>make-assembly</id> <!-- this is used for inheritance merges -->
-            <phase>package</phase> <!-- bind to the packaging phase -->
+            <id>make-assembly</id>            <!-- this is used for inheritance merges -->
+            <phase>package</phase>            <!-- bind to the packaging phase -->
             <goals>
               <goal>single</goal>
             </goals>
@@ -44,17 +44,6 @@
       </plugin>
     </plugins>
   </build>
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.google.cloud</groupId>
-        <artifactId>libraries-bom</artifactId>
-        <version>26.1.4</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
   <dependencies>
     <!--suppress VulnerableLibrariesLocal -->
     <dependency>
@@ -75,13 +64,13 @@
       <artifactId>google-oauth-client-jetty</artifactId>
     </dependency>
     <dependency>
-        <groupId>com.google.http-client</groupId>
-        <artifactId>google-http-client-gson</artifactId>
+      <groupId>com.google.http-client</groupId>
+      <artifactId>google-http-client-gson</artifactId>
     </dependency>
-<dependency>
-	<groupId>com.google.api-client</groupId>
-	<artifactId>google-api-client</artifactId>
-</dependency>
+    <dependency>
+      <groupId>com.google.api-client</groupId>
+      <artifactId>google-api-client</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.google.photos.library</groupId>
       <artifactId>google-photos-library-client</artifactId>
@@ -98,4 +87,22 @@
       <version>1.4.14</version>
     </dependency>
   </dependencies>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.cloud</groupId>
+        <artifactId>libraries-bom</artifactId>
+        <version>26.1.4</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/ebridges/gphoto-uploader</url>
+    </repository>
+  </distributionManagement>
 </project>
