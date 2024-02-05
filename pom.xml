@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>cc.roja.photos</groupId>
   <artifactId>gphoto-uploader</artifactId>
@@ -19,9 +20,73 @@
           <target>17</target>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>cc.photos.uploader.UploaderApp</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id> <!-- this is used for inheritance merges -->
+            <phase>package</phase> <!-- bind to the packaging phase -->
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.cloud</groupId>
+        <artifactId>libraries-bom</artifactId>
+        <version>26.1.4</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <dependencies>
+    <!--suppress VulnerableLibrariesLocal -->
+    <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.oauth-client</groupId>
+      <artifactId>google-oauth-client</artifactId>
+    </dependency>
+    <!--suppress VulnerableLibrariesLocal -->
+    <dependency>
+      <groupId>com.google.http-client</groupId>
+      <artifactId>google-http-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.oauth-client</groupId>
+      <artifactId>google-oauth-client-jetty</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>com.google.http-client</groupId>
+        <artifactId>google-http-client-gson</artifactId>
+    </dependency>
+<dependency>
+	<groupId>com.google.api-client</groupId>
+	<artifactId>google-api-client</artifactId>
+</dependency>
+    <dependency>
+      <groupId>com.google.photos.library</groupId>
+      <artifactId>google-photos-library-client</artifactId>
+      <version>1.7.3</version>
+    </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -31,49 +96,6 @@
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <version>1.4.14</version>
-    </dependency>
-    <!--suppress VulnerableLibrariesLocal -->
-    <dependency>
-      <groupId>com.google.photos.library</groupId>
-      <artifactId>google-photos-library-client</artifactId>
-      <version>1.7.3</version>
-    </dependency>
-    <!--suppress VulnerableLibrariesLocal -->
-    <dependency>
-      <groupId>com.google.api-client</groupId>
-      <artifactId>google-api-client</artifactId>
-      <version>1.23.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.oauth-client</groupId>
-      <artifactId>google-oauth-client-java6</artifactId>
-      <version>1.23.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>2.14.0-rc1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.offbytwo</groupId>
-      <artifactId>docopt</artifactId>
-      <version>0.6.0.20150202</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>20030203.000550</version>
-    </dependency>
-    <!--suppress VulnerableLibrariesLocal -->
-    <dependency>
-      <groupId>io.github.openunirest</groupId>
-      <artifactId>unirest-java</artifactId>
-      <version>2.5.03</version>
-    </dependency>
-    <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
-      <version>20231013</version>
     </dependency>
   </dependencies>
 </project>

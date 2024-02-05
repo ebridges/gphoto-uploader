@@ -1,13 +1,19 @@
-GPhoto Uploader.
+GPhoto Uploader
 
 Usage:
-    gphoto-uploader upload --credentials=FILE --photo-list=FILE [--verbose]
+    gphoto-uploader
     gphoto-uploader (-h | --help)
-    gphoto-uploader --version
+    gphoto-uploader (-v | --version)
 
-Options:
-    --photo-list=FILE     New line delimited list of image or video files to upload.
-    --credentials=FILE    Path to client-secrets.json file.
-    -h --help             Show this screen.
-    --version             Show version.
-    --verbose             Enable verbose logging.
+Environment Variable Configuration
+
+The following environment variables can be configured for the application:
+
+1. UPLOADER_STORED_CREDENTIALS_DIR: This variable is used to specify the directory where the uploader's credentials are stored. 
+   Default: `HOME/.uploader-credentials`
+2. UPLOADER_PHOTO_LIST: This variable is used to specify the path to the list of photos to be uploaded.
+   Default: `photo-list.txt`
+3. UPLOADER_CREDENTIALS: This variable is used to specify the path to the uploader's credentials file.
+   Default: `credentials.json`
+4. UPLOADER_VERBOSE: This variable is used to control the verbosity of the uploader. Set it to 'true' for verbose output.
+   Default: `false`

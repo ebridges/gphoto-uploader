@@ -15,3 +15,4 @@ deploy.properties
 build/
 photo-list.txt
 gradlew.bat
+.vscode/
