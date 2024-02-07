@@ -42,7 +42,7 @@ jobs:
 
     - name: Create release
       id: create_release
-      if: github.event_name == 'push'
+      permissions: write-all
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
