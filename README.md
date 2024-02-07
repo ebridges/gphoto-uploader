@@ -28,7 +28,9 @@ The following environment variables can be configured for the application:
 
 ## Releasing
 
-Run the script `release.sh` with a version number of the form `vX.Y.Z` where X, Y, & Z are integers from 0-99.  When this completes it will trigger a Github action that will create a Github release and publish a standalone executable JAR file to the Github packages repository.
+Run the script `release.sh` with a version number of the form `vX.Y.Z` where X, Y, & Z are integers from 0-99. If the results look good after running, push to remote using the commands: `git push && git push :origin "v${VERSION}" && git push --tags`.
+
+When successfully pushed to the remote, it will trigger a Github action that will create a Github release and publish a standalone executable JAR file to the Github packages repository.
 
 ## Running
 
