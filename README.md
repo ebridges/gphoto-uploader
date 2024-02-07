@@ -1,3 +1,5 @@
+[![Maven Package](https://github.com/ebridges/gphoto-uploader/actions/workflows/maven-publish.yml/badge.svg)](https://github.com/ebridges/gphoto-uploader/actions/workflows/maven-publish.yml)
+
 # gphoto-uploader
 
 Uploads images using the Google Photos API
@@ -38,5 +40,3 @@ Requires OAuth2 Client credentials to be stored in a local file.  Be sure to cho
 "Other" or "Installed".  This application, on first run, will redirect to a webserver running on localhost port `8000` that
 will receive the redirect and the authorization code. The authorization code will be used to generate the access token and 
 grant authorization to the application.
-
-[![Maven Package](https://github.com/ebridges/gphoto-uploader/actions/workflows/maven-publish.yml/badge.svg)](https://github.com/ebridges/gphoto-uploader/actions/workflows/maven-publish.yml)
