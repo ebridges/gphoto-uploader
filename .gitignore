@@ -16,3 +16,4 @@ build/
 photo-list.txt
 gradlew.bat
 .vscode/
+pom.xml.versionsBackup
