@@ -16,4 +16,4 @@ git commit --sign --signoff --message "Incremented version to ${VERSION}"
 
 git tag --message "Release v${VERSION}" --sign "v${VERSION}"
 
-echo "git push && git push :origin "v${VERSION}" && git push --tags"
+echo "git push && git push --tags"
