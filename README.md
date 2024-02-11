@@ -43,6 +43,27 @@ grant authorization to the application.
 
 ## Known Issues
 
+### Conflicting Filenames when expanding Jar
+
+**Issue**
+
+```
+$ jar xf gphoto-uploader.jar
+java.io.IOException: META-INF/license : could not create directory
+	at jdk.jartool/sun.tools.jar.Main.extractFile(Main.java:1451)
+	at jdk.jartool/sun.tools.jar.Main.extract(Main.java:1385)
+	at jdk.jartool/sun.tools.jar.Main.run(Main.java:390)
+	at jdk.jartool/sun.tools.jar.Main.main(Main.java:1702)
+```
+
+**Workaround**
+
+Remove all "license" files & directories in `META-INF`:
+
+```
+for i in `jar tf gphoto-uploader.jar | grep META-INF | grep -i license`; do zip -d gphoto-uploader.jar $i ; done
+```
+
 ### Merge Strategy of maven-assembly-plugin
 
 **Issue**
@@ -52,6 +73,8 @@ java.lang.IllegalStateException: Could not find policy 'pick_first'. Make sure i
 ```
 
 **Workaround**
+
+Add implementation for 'LoadBalancerProvider`:
 
 ```
 $ mkdir temp-directory
@@ -63,4 +86,3 @@ $ rm gphoto-uploader-2.1.0-jar-with-dependencies.jar
 $ jar --create --manifest=META-INF/MANIFEST.MF --file ../target/gphoto-uploader-2.1.0-jar-with-dependencies.jar --verbose *
 $ cd .. && /bin/rm -rf temp-directory
 ```
-
