@@ -40,3 +40,27 @@ Requires OAuth2 Client credentials to be stored in a local file.  Be sure to cho
 "Other" or "Installed".  This application, on first run, will redirect to a webserver running on localhost port `8000` that
 will receive the redirect and the authorization code. The authorization code will be used to generate the access token and 
 grant authorization to the application.
+
+## Known Issues
+
+### Merge Strategy of maven-assembly-plugin
+
+**Issue**
+
+```
+java.lang.IllegalStateException: Could not find policy 'pick_first'. Make sure its implementation is either registered to LoadBalancerRegistry or included in META-INF/services/io.grpc.LoadBalancerProvider from your jar files.
+```
+
+**Workaround**
+
+```
+$ mkdir temp-directory
+$ mv target/gphoto-uploader-2.1.0-jar-with-dependencies.jar temp-directory
+$ cd temp-directory && jar xf gphoto-uploader-2.1.0-jar-with-dependencies.jar
+$ rm META-INF/services/io.grpc.LoadBalancerProvider
+$ echo io.grpc.internal.PickFirstLoadBalancerProvider > META-INF/services/io.grpc.LoadBalancerProvider
+$ rm gphoto-uploader-2.1.0-jar-with-dependencies.jar
+$ jar --create --manifest=META-INF/MANIFEST.MF --file ../target/gphoto-uploader-2.1.0-jar-with-dependencies.jar --verbose *
+$ cd .. && /bin/rm -rf temp-directory
+```
+
