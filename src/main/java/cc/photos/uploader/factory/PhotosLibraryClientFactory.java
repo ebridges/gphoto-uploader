@@ -57,13 +57,11 @@ public class PhotosLibraryClientFactory {
                                 FixedCredentialsProvider.create(
                                         getUserCredentials(credentialsPath, selectedScopes)));
 
-        // Configure these retry settings for the "getAlbums" call.
-        librarySettingsBuilder.getAlbumSettings()
+        librarySettingsBuilder.createAlbumSettings()
                 .setRetrySettings(retrySettings)
                 .setRetryableCodes(retryableCodes);
 
-        // Configure these retry settings for the upload media call.
-        librarySettingsBuilder.updateMediaItemSettings()
+        librarySettingsBuilder.batchCreateMediaItemsSettings()
                 .setRetrySettings(retrySettings)
                 .setRetryableCodes(retryableCodes);
 
