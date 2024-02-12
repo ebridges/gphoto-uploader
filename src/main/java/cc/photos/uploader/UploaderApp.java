@@ -53,7 +53,6 @@ public class UploaderApp {
         try (PhotosLibraryClient client = PhotosLibraryClientFactory.createClient(credentialsPath, REQUIRED_SCOPES)) {
             AlbumService albumService = new AlbumService(client);
             albumService.initializeAlbumCache();
-            LOG.info("Album cache initialized");
             try (UploadService uploadService = new UploadService(client)) {
                 File filePaths = new File(opts.get(Constants.ENV_UPLOADER_PHOTO_LIST));
                 List<AlbumEntry> albumEntries = parseAlbumsToUpload(albumService, filePaths);
