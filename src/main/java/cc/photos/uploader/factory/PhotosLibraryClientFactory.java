@@ -48,8 +48,11 @@ public class PhotosLibraryClientFactory {
                 .build();
 
         // Set the status codes returned from the API that should be retried.
-        Set<StatusCode.Code> retryableCodes=
-                Set.of(StatusCode.Code.RESOURCE_EXHAUSTED, StatusCode.Code.DEADLINE_EXCEEDED, StatusCode.Code.UNAVAILABLE);
+        Set<StatusCode.Code> retryableCodes= Set.of(
+                StatusCode.Code.RESOURCE_EXHAUSTED,
+                StatusCode.Code.DEADLINE_EXCEEDED,
+                StatusCode.Code.UNAVAILABLE
+        );
 
         PhotosLibrarySettings.Builder librarySettingsBuilder=
                 PhotosLibrarySettings.newBuilder()
