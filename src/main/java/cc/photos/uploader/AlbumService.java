@@ -2,6 +2,7 @@ package cc.photos.uploader;
 
 import com.google.photos.library.v1.PhotosLibraryClient;
 import com.google.photos.types.proto.Album;
+import com.google.common.base.Stopwatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +21,11 @@ public class AlbumService {
 
     public void initializeAlbumCache() {
         LOG.info("Initializing album cache");
+        Stopwatch timer = Stopwatch.createStarted();
         for (Album album : client.listAlbums().iterateAll()) {
             ALBUM_CACHE.put(album.getTitle(), album);
         }
+        LOG.info("Album cache initialized with {} entries in {}", ALBUM_CACHE.size(), timer.stop());
     }
 
     public Album createAlbumIfAbsent(String albumName) {
