@@ -64,7 +64,15 @@ public class PhotosLibraryClientFactory {
                 .setRetrySettings(retrySettings)
                 .setRetryableCodes(retryableCodes);
 
+        librarySettingsBuilder.batchAddMediaItemsToAlbumSettings()
+                .setRetrySettings(retrySettings)
+                .setRetryableCodes(retryableCodes);
+
         librarySettingsBuilder.batchCreateMediaItemsSettings()
+                .setRetrySettings(retrySettings)
+                .setRetryableCodes(retryableCodes);
+
+        librarySettingsBuilder.uploadMediaItemSettingsBuilder()
                 .setRetrySettings(retrySettings)
                 .setRetryableCodes(retryableCodes);
 
