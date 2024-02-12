@@ -40,9 +40,9 @@ public class PhotosLibraryClientFactory {
             throws IOException, GeneralSecurityException {
         // Create a new retry configuration.
         RetrySettings retrySettings= RetrySettings.newBuilder()
-                .setInitialRetryDelay(Duration.ofSeconds(4))
+                .setInitialRetryDelay(Duration.ofSeconds(10))
                 .setRetryDelayMultiplier(1.5)
-                .setMaxAttempts(7)
+                .setMaxAttempts(10)
                 .setMaxRetryDelay(Duration.ofSeconds(60))
                 .setTotalTimeout(Duration.ofMinutes(15))
                 .build();
